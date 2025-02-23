@@ -1,6 +1,5 @@
 import streamlit as st
 import PyPDF2
-import mammoth
 import docx
 import websocket
 import json
@@ -18,14 +17,13 @@ def read_docx(file):
 def read_txt(file):
     return file.read().decode("utf-8")
 
-def send_request(task, content):
+def send_request(task, content, question):
     ws = websocket.WebSocket()
     ws.connect('wss://backend.buildpicoapps.com/ask_ai_streaming_v2')
     ws.send(json.dumps({
         "appId": "mouth-executive",
-        "prompt": "Generate responses based on the document content.",
-        "documentContent": content,
-        "task": task
+        "prompt": f"Generate responses based on the document content. Task: {task}, Question: {question}",
+        "documentContent": content
     }))
     response = ""
     while True:
@@ -40,7 +38,8 @@ st.title("Chat Bot App")
 st.write("### Ask Me Anything!")
 
 uploaded_file = st.file_uploader("Upload your document", type=["pdf", "docx", "txt"])
-task = st.text_input("What do you want me to do today?")
+task = st.text_input("What do you want me to do today? (e.g., summarize, extract key points, etc.)")
+question = st.text_input("Ask a specific question about the document")
 
 if st.button("Let's Do This!"):
     if uploaded_file is None:
@@ -58,6 +57,6 @@ if st.button("Let's Do This!"):
             st.stop()
 
         st.write("### Processing...")
-        response = send_request(task, content)
+        response = send_request(task, content, question)
         st.write("### Response:")
         st.write(response)
