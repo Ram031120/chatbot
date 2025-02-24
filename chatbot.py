@@ -3,8 +3,8 @@ import openai
 import PyPDF2
 import docx
 
-# Set OpenAI API key directly
-openai.api_key = "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"  # Replace this with your OpenAI API Key
+# Set your OpenAI API key (replace "your-api-key-here" with your actual API key)
+openai.api_key = "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"
 
 # Function to read PDF
 def read_pdf(file):
@@ -22,17 +22,18 @@ def read_docx(file):
 def read_txt(file):
     return file.read().decode("utf-8")
 
-# Function to process the document with OpenAI (ChatGPT API)
+# Function to process the document with OpenAI ChatGPT API
 def ask_chatgpt(content, question):
-    # Use the ChatGPT API (gpt-3.5-turbo model)
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+    client = openai.Client()  # Correct way to initialize OpenAI client
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",  # Use gpt-4 if needed
         messages=[
             {"role": "system", "content": "You are an AI assistant that helps analyze documents."},
             {"role": "user", "content": f"Question: {question}\nDocument:\n{content}"}
         ]
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
 
 # Streamlit UI
 st.title("Chat Bot App")
@@ -40,13 +41,13 @@ st.write("### Ask Me Anything About Your Document!")
 
 # User inputs
 uploaded_file = st.file_uploader("Upload your document", type=["pdf", "docx", "txt"])
-user_input = st.text_input("Ask a question or describe the task you want done")
+question = st.text_input("Ask a question about the document")
 
 if st.button("Process Document"):
     if not uploaded_file:
         st.warning("Please upload a document.")
-    elif not user_input:
-        st.warning("Please enter a question or task.")
+    elif not question:
+        st.warning("Please enter a question.")
     else:
         file_type = uploaded_file.type
         if file_type == "application/pdf":
@@ -60,6 +61,6 @@ if st.button("Process Document"):
             st.stop()
 
         st.write("### Processing...")
-        response = ask_chatgpt(content, user_input)
+        response = ask_chatgpt(content, question)
         st.write("### Response:")
         st.write(response)
