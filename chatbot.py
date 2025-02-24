@@ -2,7 +2,6 @@ import streamlit as st
 import openai
 import PyPDF2
 import docx
-import json
 
 # Set OpenAI API key directly
 openai.api_key = "your-api-key-here"
@@ -24,15 +23,14 @@ def read_txt(file):
     return file.read().decode("utf-8")
 
 # Function to process the document with OpenAI
-def ask_openai(task, content, question):
-    response = openai.ChatCompletion.create(
+def ask_openai(content, question):
+    # Adjusted to new API format
+    response = openai.Completion.create(
         model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are an AI assistant that helps analyze documents."},
-            {"role": "user", "content": f"Task: {task}\nQuestion: {question}\nDocument:\n{content}"}
-        ]
+        prompt=f"Question: {question}\nDocument:\n{content}",
+        max_tokens=500
     )
-    return response.choices[0].message['content']
+    return response['choices'][0]['text']
 
 # Streamlit UI
 st.title("Chat Bot App")
@@ -40,12 +38,13 @@ st.write("### Ask Me Anything About Your Document!")
 
 # User inputs
 uploaded_file = st.file_uploader("Upload your document", type=["pdf", "docx", "txt"])
-task = st.text_input("What do you want me to do? (e.g., summarize, extract key points)")
-question = st.text_input("Ask a specific question about the document")
+user_input = st.text_input("Ask a question or describe the task you want done")
 
 if st.button("Process Document"):
     if not uploaded_file:
         st.warning("Please upload a document.")
+    elif not user_input:
+        st.warning("Please enter a question or task.")
     else:
         file_type = uploaded_file.type
         if file_type == "application/pdf":
@@ -59,6 +58,6 @@ if st.button("Process Document"):
             st.stop()
 
         st.write("### Processing...")
-        response = ask_openai(task, content, question)
+        response = ask_openai(content, user_input)
         st.write("### Response:")
         st.write(response)
