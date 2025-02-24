@@ -4,7 +4,7 @@ import PyPDF2
 import docx
 
 # Set OpenAI API key directly
-openai.api_key = "your-api-key-here"
+openai.api_key = "your-api-key-here"  # Replace this with your OpenAI API Key
 
 # Function to read PDF
 def read_pdf(file):
@@ -22,15 +22,17 @@ def read_docx(file):
 def read_txt(file):
     return file.read().decode("utf-8")
 
-# Function to process the document with OpenAI
-def ask_openai(content, question):
-    # Adjusted to new API format
-    response = openai.Completion.create(
+# Function to process the document with OpenAI (ChatGPT API)
+def ask_chatgpt(content, question):
+    # Use the ChatGPT API (gpt-3.5-turbo model)
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        prompt=f"Question: {question}\nDocument:\n{content}",
-        max_tokens=500
+        messages=[
+            {"role": "system", "content": "You are an AI assistant that helps analyze documents."},
+            {"role": "user", "content": f"Question: {question}\nDocument:\n{content}"}
+        ]
     )
-    return response['choices'][0]['text']
+    return response['choices'][0]['message']['content']
 
 # Streamlit UI
 st.title("Chat Bot App")
@@ -58,6 +60,6 @@ if st.button("Process Document"):
             st.stop()
 
         st.write("### Processing...")
-        response = ask_openai(content, user_input)
+        response = ask_chatgpt(content, user_input)
         st.write("### Response:")
         st.write(response)
