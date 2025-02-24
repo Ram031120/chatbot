@@ -1,5 +1,6 @@
 streamlit
 PyPDF2
 python-docx
-mammoth
 websocket-client
+requests  # In case you need to make API calls to OpenAI or other services
+openai  # If you plan to use OpenAI's API for chatbot functionality
