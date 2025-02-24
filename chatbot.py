@@ -4,6 +4,9 @@ import PyPDF2
 import docx
 import json
 
+# Set OpenAI API key directly
+openai.api_key = "your-api-key-here"
+
 # Function to read PDF
 def read_pdf(file):
     reader = PyPDF2.PdfReader(file)
@@ -21,33 +24,27 @@ def read_txt(file):
     return file.read().decode("utf-8")
 
 # Function to process the document with OpenAI
-def ask_openai(api_key, task, content, question):
-    client = openai.OpenAI(api_key=api_key)  # Use the API key
-
-    response = client.chat.completions.create(
+def ask_openai(task, content, question):
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are an AI assistant that helps analyze documents."},
             {"role": "user", "content": f"Task: {task}\nQuestion: {question}\nDocument:\n{content}"}
         ]
     )
-    
-    return response.choices[0].message.content
+    return response.choices[0].message['content']
 
 # Streamlit UI
 st.title("Chat Bot App")
 st.write("### Ask Me Anything About Your Document!")
 
 # User inputs
-api_key = st.text_input("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", type="password")  # Secure API key input
 uploaded_file = st.file_uploader("Upload your document", type=["pdf", "docx", "txt"])
 task = st.text_input("What do you want me to do? (e.g., summarize, extract key points)")
 question = st.text_input("Ask a specific question about the document")
 
 if st.button("Process Document"):
-    if not api_key:
-        st.error("Please enter your OpenAI API key.")
-    elif not uploaded_file:
+    if not uploaded_file:
         st.warning("Please upload a document.")
     else:
         file_type = uploaded_file.type
@@ -62,6 +59,6 @@ if st.button("Process Document"):
             st.stop()
 
         st.write("### Processing...")
-        response = ask_openai(api_key, task, content, question)
+        response = ask_openai(task, content, question)
         st.write("### Response:")
         st.write(response)
