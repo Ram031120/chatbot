@@ -4,7 +4,7 @@ import PyPDF2
 import docx
 
 # Set OpenAI API key directly
-openai.api_key = "your-api-key-here"  # Replace this with your OpenAI API Key
+openai.api_key = "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"  # Replace this with your OpenAI API Key
 
 # Function to read PDF
 def read_pdf(file):
